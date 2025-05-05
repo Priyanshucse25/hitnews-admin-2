@@ -96,7 +96,7 @@ const submit = async () => {
     formData.append("image", selectedFile.value);
 
     const response = await axios.post(
-      "https://backend-1-ctkv.onrender.com/api/categories",
+      "https://backend-5gsq.onrender.com/api/categories",
       formData,
       {
         headers: {

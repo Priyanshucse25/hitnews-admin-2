@@ -11,7 +11,7 @@ export const useCategoryStore = defineStore("category", () => {
   const getCategories = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.1.21:5000/api/categories",
+        "https://backend-5gsq.onrender.com/api/categories",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -41,7 +41,7 @@ export const useCategoryStore = defineStore("category", () => {
   const getBanner = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.1.21:5000/api/banner",
+        "https://backend-5gsq.onrender.com/api/banner",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

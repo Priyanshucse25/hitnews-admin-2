@@ -97,7 +97,7 @@ const updateCategory = async () => {
     };
 
     const response = await axios.put(
-      `https://backend-1-ctkv.onrender.com/api/categories/category/${props.category._id}`,
+      `https://backend-5gsq.onrender.com/api/categories/category/${props.category._id}`,
       payload,
       {
         headers: {

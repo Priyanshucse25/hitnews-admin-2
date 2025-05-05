@@ -276,7 +276,7 @@ const updateLogo = async (event) => {
   formData.append("logo", file);
 
   try {
-    await axios.put("http://192.168.1.21:5000/api/logo", formData, {
+    await axios.put("https://backend-5gsq.onrender.com/api/logo", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -318,7 +318,7 @@ const deleteCategory = async (strategy) => {
     }
 
     await axios.delete(
-      `http://192.168.1.21:5000/api/categories/category/${categoryId}`,
+      `https://backend-5gsq.onrender.com/api/categories/category/${categoryId}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -337,7 +337,7 @@ const deleteCategory = async (strategy) => {
 const fetchBanner = async () => {
   try {
     const response = await axios.get(
-      "http://192.168.1.21:5000/api/banner",
+      "https://backend-5gsq.onrender.com/api/banner",
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -365,7 +365,7 @@ const saveBanner = async () => {
   formData.append("link", bannerLink.value);
 
   try {
-    await axios.post("http://192.168.1.21:5000/api/banner", formData, {
+    await axios.post("https://backend-5gsq.onrender.com/api/banner", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
