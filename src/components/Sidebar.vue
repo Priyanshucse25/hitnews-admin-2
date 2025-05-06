@@ -33,6 +33,10 @@
             />
           </svg>
         </label>
+        <!-- Logo Loading Overlay -->
+        <div v-if="isLogoLoading" class="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center rounded-xl">
+          <div class="h-6 w-6 rounded-full border-2 border-[#B48D3E] border-t-transparent animate-spin"></div>
+        </div>
       </div>
     </div>
 
@@ -78,8 +82,8 @@
     </div>
 
     <!-- Category List -->
-    <div class="text-center mb-4 category-scroll-container pr-1">
-      <ul class="mt-4">
+    <div class="text-center mb-4 category-scroll-container pr-1 overflow-y-auto">
+      <ul class="mt-4 ">
         <li
           v-for="(strategy, index) in categoryStore.categories"
           :key="strategy.name || index"
@@ -139,8 +143,12 @@
             </button>
             <button
               @click="deleteCategory(strategy)"
-              class="w-full text-left px-4 py-2 hover:bg-gray-100"
+              class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center"
+              :disabled="deletingCategoryId === strategy._id"
             >
+              <span v-if="deletingCategoryId === strategy._id" class="mr-2">
+                <div class="h-4 w-4 rounded-full border-2 border-[#B48D3E] border-t-transparent animate-spin"></div>
+              </span>
               Delete
             </button>
           </div>
@@ -166,7 +174,7 @@
       v-if="showBannerModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white p-6 rounded-lg w-full max-w-md">
+      <div class="bg-white p-6 rounded-lg w-full max-w-md relative">
         <h3 class="text-center text-[#B48D3E] font-semibold text-lg mb-4">
           Upload Banner
         </h3>
@@ -210,10 +218,19 @@
           </button>
           <button
             @click="saveBanner"
-            class="bg-[#B48D3E] text-white px-4 py-2 rounded hover:bg-[#9C6F3B] transition"
+            class="bg-[#B48D3E] text-white px-4 py-2 rounded hover:bg-[#9C6F3B] transition flex items-center"
+            :disabled="isBannerSaving"
           >
+            <span v-if="isBannerSaving" class="mr-2">
+              <div class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+            </span>
             Save
           </button>
+        </div>
+        
+        <!-- Banner Modal Loading Overlay -->
+        <div v-if="isBannerSaving" class="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center rounded-lg">
+          <div class="h-10 w-10 rounded-full border-4 border-[#B48D3E] border-t-transparent animate-spin"></div>
         </div>
       </div>
     </div>
@@ -239,6 +256,11 @@ const categoryStore = useCategoryStore();
 const hoveredIndex = ref(null);
 const dropdownIndex = ref(null);
 const editingCategory = ref(null);
+
+// Loading states
+const isLogoLoading = ref(false);
+const isBannerSaving = ref(false);
+const deletingCategoryId = ref(null);
 
 const goToAllContent = () => {
   router.push("/category/all");
@@ -266,6 +288,8 @@ const updateLogo = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
+  isLogoLoading.value = true;
+
   const reader = new FileReader();
   reader.onload = () => {
     logoPreview.value = reader.result;
@@ -285,14 +309,17 @@ const updateLogo = async (event) => {
     fetchLogo(); // refresh
   } catch (error) {
     console.error("Error updating logo:", error);
+  } finally {
+    isLogoLoading.value = false;
   }
 };
 
 // Fetch Logo
 const fetchLogo = async () => {
+  isLogoLoading.value = true;
   try {
     const response = await axios.get(
-      "http://192.168.1.21:5000/api/logo",
+      "https://backend-5gsq.onrender.com/api/logo",
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -303,11 +330,12 @@ const fetchLogo = async () => {
     logoPreview.value = response.data.image;
   } catch (error) {
     console.error("Error fetching logo:", error);
+  } finally {
+    isLogoLoading.value = false;
   }
 };
 
 // Delete Category
-
 const deleteCategory = async (strategy) => {
   try {
     console.log("Strategy object:", strategy); // Debug: log the full object
@@ -316,6 +344,8 @@ const deleteCategory = async (strategy) => {
     if (!categoryId) {
       throw new Error("Invalid category ID");
     }
+
+    deletingCategoryId.value = categoryId;
 
     await axios.delete(
       `https://backend-5gsq.onrender.com/api/categories/category/${categoryId}`,
@@ -330,6 +360,9 @@ const deleteCategory = async (strategy) => {
     categoryStore.removeCategory(strategy.name);
   } catch (error) {
     console.error("Error deleting category:", error);
+  } finally {
+    deletingCategoryId.value = null;
+    dropdownIndex.value = null; // Close dropdown after delete
   }
 };
 
@@ -361,6 +394,8 @@ const saveBanner = async () => {
     return;
   }
 
+  isBannerSaving.value = true;
+
   formData.append("image", selectedBannerFile.value);
   formData.append("link", bannerLink.value);
 
@@ -375,6 +410,8 @@ const saveBanner = async () => {
     fetchBanner();
   } catch (error) {
     console.error("Error saving banner:", error);
+  } finally {
+    isBannerSaving.value = false;
   }
 };
 

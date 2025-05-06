@@ -12,6 +12,14 @@
           <button @click="saveContent" class="px-4 py-2 bg-[#B48D3E] text-white rounded">Save</button>
         </div>
       </div>
+      <!-- Loader Overlay -->
+<div
+  v-if="isLoading"
+  class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+>
+  <div class="rounded-full h-10 w-10 border-4 border-white border-t-transparent animate-spin"></div>
+</div>
+
     </div>
   </template>
   
@@ -19,7 +27,7 @@
   import { ref, watch } from 'vue'
   const props = defineProps(['editCardData'])
   const emit = defineEmits(['save', 'close'])
-  
+  const isLoading = ref(false)
   const form = ref({ title: '', image: '', description: '' })
   
   watch(() => props.editCardData, (val) => {
@@ -42,6 +50,7 @@
   
   function saveContent() {
     emit('save', { ...form.value })
+    isLoading.value = false
   }
   </script>
   

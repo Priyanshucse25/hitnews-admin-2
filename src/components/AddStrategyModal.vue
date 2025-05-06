@@ -1,10 +1,11 @@
+<!-- sidebar category modal -->
 <template>
   <div
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
     <div class="bg-white p-6 rounded shadow-md w-96">
       <h2 class="text-xl font-bold mb-4 text-[#B48D3E]">Add Category</h2>
-
+      
       <!-- Category Name Input -->
       <input
         v-model="strategyName"
@@ -12,7 +13,7 @@
         placeholder="Enter Category name"
         class="border px-3 py-2 w-full rounded mb-4 text-slate-900"
       />
-
+      
       <!-- Icon Upload -->
       <label class="block mb-4">
         <span class="text-sm font-medium text-gray-700">Choose Icon</span>
@@ -23,13 +24,13 @@
           class="mt-1 block w-full text-sm text-gray-500"
         />
       </label>
-
+      
       <!-- Icon Preview -->
       <div v-if="iconPreview" class="mb-4">
         <p class="text-sm text-gray-600">Preview:</p>
         <img :src="iconPreview" class="h-12 w-12 object-contain" />
       </div>
-
+      
       <!-- Error or Success Message -->
       <div
         v-if="message"
@@ -38,7 +39,7 @@
       >
         <p>{{ message }}</p>
       </div>
-
+      
       <!-- Buttons -->
       <div class="flex justify-end gap-2">
         <button
@@ -49,11 +50,41 @@
         </button>
         <button
           @click="submit"
-          class="bg-[#B48D3E] text-white px-4 py-2 rounded"
+          class="bg-[#B48D3E] text-white px-4 py-2 rounded flex items-center justify-center"
+          :disabled="isLoading"
         >
-          Add
+          <svg
+            v-if="isLoading"
+            class="animate-spin h-4 w-4 mr-2 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          <span>{{ isLoading ? 'Adding...' : 'Add' }}</span>
         </button>
       </div>
+    </div>
+    
+    <!-- Loader Overlay -->
+    <div
+      v-if="isLoading"
+      class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+    >
+      <div class="h-10 w-10 rounded-full border-4 border-white border-t-transparent animate-spin"></div>
     </div>
   </div>
 </template>
@@ -70,6 +101,7 @@ const iconPreview = ref(null);
 const selectedFile = ref(null); // store the actual file
 const message = ref(""); // To show success or error messages
 const messageType = ref(""); // 'error' or 'success'
+const isLoading = ref(false); // Add isLoading ref
 
 function handleIconUpload(e) {
   const file = e.target.files[0];
@@ -89,12 +121,14 @@ const submit = async () => {
     messageType.value = "error";
     return;
   }
+  
+  isLoading.value = true; // Set loading to true when starting submission
 
   try {
     const formData = new FormData();
     formData.append("name", strategyName.value);
     formData.append("image", selectedFile.value);
-
+    
     const response = await axios.post(
       "https://backend-5gsq.onrender.com/api/categories",
       formData,
@@ -105,24 +139,24 @@ const submit = async () => {
         },
       }
     );
-
+    
     await categoryStore.getCategories();
-
+    
     const newCategory = response?.data?.category || {};
-
+    
     emit("add-strategy", {
       name: newCategory.name,
       image: newCategory.image, // Adjust if backend uses a different property name
     });
-
+    
     // Reset form
     strategyName.value = "";
     iconPreview.value = null;
     selectedFile.value = null;
-
+    
     message.value = "Category created successfully!";
     messageType.value = "success";
-
+    
     emit("close");
   } catch (err) {
     console.error(
@@ -131,6 +165,8 @@ const submit = async () => {
     );
     message.value = "Error creating category. Please try again.";
     messageType.value = "error";
+  }finally {
+    isLoading.value = false;
   }
 };
 </script>
